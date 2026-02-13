@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rana's Dad Jokes</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+    header {
+      text-align: center;
+      padding: 30px 0 20px;
+      color: white;
+    }
+    header h1 { font-size: 2.5em; margin-bottom: 5px; }
+    header p { font-size: 1.1em; opacity: 0.9; }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    nav button {
+      padding: 10px 24px;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s;
+    }
+    nav button:hover, nav button.active {
+      background: white;
+      color: #764ba2;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin: 20px 0;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+    .card h2 { margin-bottom: 20px; color: #764ba2; }
+    .joke-text {
+      font-size: 1.4em;
+      line-height: 1.6;
+      text-align: center;
+      padding: 20px;
+      color: #444;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .joke-meta {
+      text-align: center;
+      color: #999;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+    .stars {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .stars .star {
+      font-size: 2em;
+      cursor: pointer;
+      transition: transform 0.2s;
+      color: #ddd;
+    }
+    .stars .star:hover, .stars .star.active { color: #f5a623; transform: scale(1.2); }
+    .stars .star.rated { color: #f5a623; }
+    .rating-info {
+      text-align: center;
+      color: #999;
+      font-size: 0.9em;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(118,75,162,0.4); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-center { display: flex; justify-content: center; margin-top: 20px; }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1em;
+      font-family: inherit;
+      transition: border-color 0.3s;
+      margin-bottom: 15px;
+    }
+    textarea:focus, input[type="text"]:focus { border-color: #764ba2; outline: none; }
+    textarea { height: 100px; resize: vertical; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
+    .top-list { list-style: none; }
+    .top-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 15px;
+    }
+    .top-item:last-child { border-bottom: none; }
+    .rank {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .rank.gold { background: linear-gradient(135deg, #f5a623, #e8910c); }
+    .rank.silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); }
+    .rank.bronze { background: linear-gradient(135deg, #cd7f32, #b06b2a); }
+    .top-joke-text { flex: 1; color: #444; }
+    .top-rating { text-align: right; flex-shrink: 0; }
+    .top-rating .star-display { color: #f5a623; font-size: 1.1em; }
+    .top-rating .count { color: #999; font-size: 0.8em; }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 1.1em;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      transition: transform 0.3s;
+      z-index: 100;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .section { display: none; }
+    .section.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Rana's Dad Jokes</h1>
+      <p>The world's finest collection of groan-worthy humor</p>
+    </header>
+    <nav>
+      <button class="active" onclick="showSection('random')">Random Joke</button>
+      <button onclick="showSection('submit')">Submit Joke</button>
+      <button onclick="showSection('top')">Top List</button>
+    </nav>
+
+    <div id="random" class="section active">
+      <div class="card">
+        <h2>Random Dad Joke</h2>
+        <div id="joke-display" class="joke-text">Click the button to get a random joke!</div>
+        <div id="joke-meta" class="joke-meta"></div>
+        <div id="rating-section" style="display:none">
+          <div class="stars" id="stars-container">
+            <span class="star" data-stars="1">&#9733;</span>
+            <span class="star" data-stars="2">&#9733;</span>
+            <span class="star" data-stars="3">&#9733;</span>
+            <span class="star" data-stars="4">&#9733;</span>
+            <span class="star" data-stars="5">&#9733;</span>
+          </div>
+          <div id="rating-info" class="rating-info"></div>
+        </div>
+        <div class="btn-center">
+          <button class="btn" onclick="getRandomJoke()">Get Random Joke</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="submit" class="section">
+      <div class="card">
+        <h2>Submit Your Best Dad Joke</h2>
+        <label for="joke-text">Your Joke</label>
+        <textarea id="joke-text" placeholder="Why don't scientists trust atoms? Because they make up everything!"></textarea>
+        <label for="joke-author">Your Name (optional)</label>
+        <input type="text" id="joke-author" placeholder="Anonymous">
+        <div class="btn-center">
+          <button class="btn" id="submit-btn" onclick="submitJoke()">Submit Joke</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="top" class="section">
+      <div class="card">
+        <h2>Top Dad Jokes</h2>
+        <ul id="top-list" class="top-list">
+          <li class="empty-state">Loading...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let currentJoke = null;
+
+    function showSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById(name).classList.add('active');
+      event.target.classList.add('active');
+      if (name === 'top') loadTopList();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function renderStars(avg) {
+      const rounded = Math.round(avg * 2) / 2;
+      let html = '';
+      for (let i = 1; i <= 5; i++) {
+        html += i <= rounded ? '&#9733;' : '&#9734;';
+      }
+      return html;
+    }
+
+    async function getRandomJoke() {
+      try {
+        const res = await fetch('/api/jokes/random');
+        if (res.status === 404) {
+          document.getElementById('joke-display').textContent = 'No jokes yet! Be the first to submit one.';
+          document.getElementById('joke-meta').textContent = '';
+          document.getElementById('rating-section').style.display = 'none';
+          return;
+        }
+        const joke = await res.json();
+        currentJoke = joke;
+        document.getElementById('joke-display').textContent = joke.text;
+        document.getElementById('joke-meta').textContent = `- ${joke.author}`;
+        document.getElementById('rating-section').style.display = 'block';
+        updateRatingDisplay(joke);
+        resetStarSelection();
+      } catch (e) {
+        document.getElementById('joke-display').textContent = 'Failed to load joke. Try again!';
+      }
+    }
+
+    function updateRatingDisplay(joke) {
+      const avg = parseFloat(joke.avg_rating) || 0;
+      const count = parseInt(joke.rating_count) || 0;
+      const info = document.getElementById('rating-info');
+      if (count > 0) {
+        info.innerHTML = `${renderStars(avg)} ${avg.toFixed(1)}/5 (${count} rating${count !== 1 ? 's' : ''})`;
+      } else {
+        info.textContent = 'No ratings yet - be the first!';
+      }
+    }
+
+    function resetStarSelection() {
+      document.querySelectorAll('#stars-container .star').forEach(s => {
+        s.classList.remove('active');
+      });
+    }
+
+    document.getElementById('stars-container').addEventListener('click', async (e) => {
+      if (!e.target.classList.contains('star') || !currentJoke) return;
+      const stars = parseInt(e.target.dataset.stars);
+      try {
+        const res = await fetch(`/api/jokes/${currentJoke.id}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stars })
+        });
+        const updated = await res.json();
+        currentJoke = updated;
+        updateRatingDisplay(updated);
+        document.querySelectorAll('#stars-container .star').forEach(s => {
+          s.classList.toggle('active', parseInt(s.dataset.stars) <= stars);
+        });
+        showToast(`Rated ${stars} star${stars !== 1 ? 's' : ''}!`);
+      } catch (e) {
+        showToast('Failed to rate. Try again!');
+      }
+    });
+
+    document.getElementById('stars-container').addEventListener('mouseover', (e) => {
+      if (!e.target.classList.contains('star')) return;
+      const stars = parseInt(e.target.dataset.stars);
+      document.querySelectorAll('#stars-container .star').forEach(s => {
+        s.style.color = parseInt(s.dataset.stars) <= stars ? '#f5a623' : '#ddd';
+      });
+    });
+
+    document.getElementById('stars-container').addEventListener('mouseout', () => {
+      document.querySelectorAll('#stars-container .star').forEach(s => {
+        s.style.color = s.classList.contains('active') ? '#f5a623' : '#ddd';
+      });
+    });
+
+    async function submitJoke() {
+      const text = document.getElementById('joke-text').value.trim();
+      const author = document.getElementById('joke-author').value.trim();
+      if (!text) { showToast('Please enter a joke!'); return; }
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/jokes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, author })
+        });
+        if (res.ok) {
+          document.getElementById('joke-text').value = '';
+          document.getElementById('joke-author').value = '';
+          showToast('Joke submitted!');
+        } else {
+          showToast('Failed to submit joke.');
+        }
+      } catch (e) {
+        showToast('Error submitting joke.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function loadTopList() {
+      const list = document.getElementById('top-list');
+      try {
+        const res = await fetch('/api/jokes/top?limit=10');
+        const jokes = await res.json();
+        if (jokes.length === 0) {
+          list.innerHTML = '<li class="empty-state">No rated jokes yet. Start rating!</li>';
+          return;
+        }
+        list.innerHTML = jokes.map((joke, i) => {
+          const avg = parseFloat(joke.avg_rating) || 0;
+          const count = parseInt(joke.rating_count) || 0;
+          const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+          return `
+            <li class="top-item">
+              <div class="rank ${rankClass}">${i + 1}</div>
+              <div class="top-joke-text">${escapeHtml(joke.text)}<br><small style="color:#999">- ${escapeHtml(joke.author)}</small></div>
+              <div class="top-rating">
+                <div class="star-display">${renderStars(avg)} ${avg.toFixed(1)}</div>
+                <div class="count">${count} rating${count !== 1 ? 's' : ''}</div>
+              </div>
+            </li>`;
+        }).join('');
+      } catch (e) {
+        list.innerHTML = '<li class="empty-state">Failed to load top list.</li>';
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
