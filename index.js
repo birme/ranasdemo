@@ -4,7 +4,7 @@ const { Pool } = require("pg");
 
 const app = express();
 const port = process.env.PORT || 8080;
-const APP_CONFIG_URL = process.env.APP_CONFIG_URL;
+const APP_CONFIG_URL = process.env.APP_CONFIG_URL || process.env.CONFIG_SVC;
 
 async function getConfig(key) {
   if (!APP_CONFIG_URL) return undefined;
@@ -20,7 +20,6 @@ async function getConfig(key) {
 }
 
 async function start() {
-  console.log("All env vars:", Object.keys(process.env).join(", "));
   const databaseUrl =
     process.env.DATABASE_URL || (await getConfig("DATABASE_URL"));
   if (!databaseUrl) {
