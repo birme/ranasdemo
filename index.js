@@ -20,6 +20,8 @@ async function getConfig(key) {
 }
 
 async function start() {
+  console.log("APP_CONFIG_URL:", APP_CONFIG_URL || "(not set)");
+  console.log("DATABASE_URL env:", process.env.DATABASE_URL ? "set" : "(not set)");
   const databaseUrl =
     process.env.DATABASE_URL || (await getConfig("DATABASE_URL"));
   if (!databaseUrl) {
