@@ -6,7 +6,9 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString:
+    process.env.DATABASE_URL ||
+    "postgresql://dadjokes:dadjokes2024@172.232.131.169:10567/dadjokes",
   ssl: false,
 });
 
